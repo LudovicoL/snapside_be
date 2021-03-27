@@ -1,0 +1,72 @@
+package com.unisalento.snapside.restcontrollers;
+
+import com.unisalento.snapside.adapters.UserAdapter;
+import com.unisalento.snapside.exceptions.UserNotFoundException;
+import com.unisalento.snapside.generated.domain.UserEntity;
+import com.unisalento.snapside.iservices.IUserService;
+import com.unisalento.snapside.models.UserDTO;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
+//import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.web.bind.annotation.*;
+
+import javax.servlet.http.HttpServletRequest;
+import java.security.Principal;
+import java.util.Base64;
+import java.util.Iterator;
+import java.util.List;
+
+@RestController
+@CrossOrigin
+public class SecureLoginController {
+
+/*    @RequestMapping("/loginx")
+    public boolean login(@RequestBody UserEntity user) {
+        return  user.getUsername().equals("and") && user.getPassword().equals("pass");
+    }*/
+
+    @Autowired
+    IUserService userService;
+    @RequestMapping(value="/loginx", produces= MediaType.APPLICATION_JSON_VALUE)
+    public UserDTO login(@RequestBody UserEntity user) throws UserNotFoundException {
+        boolean loggedin = false;
+        List<UserEntity> users = null;
+        users=(userService.getAll());
+        //UserEntity user = new UserEntity();
+        UserDTO userDTO= new UserDTO();
+        Iterator<UserEntity> users_iter = users.iterator();
+        System.out.println("Loginx secure called");
+        while(users_iter.hasNext()) {
+            UserDTO currentUserDTO= new UserDTO();
+
+            UserEntity currentUserEntity=users_iter.next();
+
+            currentUserDTO= UserAdapter.UserEntityToUserDTO(currentUserEntity);
+            //System.out.println(currentUserDTO.getUsername()+","+currentUserDTO.getPassword());
+            //System.out.println(user.getUsername()+","+new BCryptPasswordEncoder().encode(user.getPassword()));
+            System.out.println("AAAAAAAAAAAAAA  "+user.getPassword());
+            System.out.println("matcha? "+new BCryptPasswordEncoder().matches("1234",new BCryptPasswordEncoder().encode("1234")));
+            if(currentUserDTO.getUsername().equals(user.getUsername())
+            )//&& new BCryptPasswordEncoder().matches(user.getPassword(),currentUserDTO.getPassword()))
+            {
+                //classSingleton1.setStudenteDTO(studenteeDTO);
+                //System.out.println(classSingleton1.getStudenteDTO());
+                loggedin=true;
+                System.out.println(loggedin);
+                userDTO=currentUserDTO;
+                break;
+            }
+        }
+        return userDTO;
+    }
+
+
+
+    @RequestMapping("/userx")
+    public Principal user(HttpServletRequest request) {
+        String authToken = request.getHeader("Authorization")
+                .substring("Basic".length()).trim();
+        return () ->  new String(Base64.getDecoder()
+                .decode(authToken)).split(":")[0];
+    }
+}

@@ -1,0 +1,9 @@
+Per la sicurezza:::
+
+Abilitare le classi basicauthconfiguration e datasourceconfig
+Abilitare anche la classe Securelogincontroller
+Abilitare libreria in build.gradle
+Ci saranno degli Import di BCrypt da decommentare
+
+Le password nel db mysql devono essere crittografate con BCrypt
+
